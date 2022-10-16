@@ -1,5 +1,6 @@
 package hr.algebra.airhockey;
 
+import hr.algebra.airhockey.hr.algebra.airhockey.utils.GameUtils;
 import hr.algebra.airhockey.models.LeaderboardController;
 import hr.algebra.airhockey.models.Player;
 import javafx.event.ActionEvent;
@@ -40,7 +41,7 @@ public class MovesController {
 
     public void returnClick(ActionEvent actionEvent) {
         Scene scene = null;
-        scene = LeaderboardController.currentScene;
+        scene =  GameUtils.currentScene;
         MainApplication.getStage().setTitle("AirHockey");
         MainApplication.getStage().setScene(scene);
         MainApplication.getStage().show();

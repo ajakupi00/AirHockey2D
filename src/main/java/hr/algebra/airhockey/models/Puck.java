@@ -1,6 +1,7 @@
 package hr.algebra.airhockey.models;
 
 import hr.algebra.airhockey.GameScreenController;
+import hr.algebra.airhockey.hr.algebra.airhockey.utils.GameUtils;
 import javafx.animation.AnimationTimer;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Circle;
@@ -8,7 +9,7 @@ import javafx.scene.shape.Circle;
 public class Puck extends Circle {
     private int xDirection = 0;
     private int yDirection = 0;
-    private int speed = 5;
+    private double speed = 5;
     private Boolean firstTouch = false;
 
 
@@ -35,7 +36,7 @@ public class Puck extends Circle {
         return yDirection;
     }
 
-    public int getSpeed() {
+    public double getSpeed() {
         return speed;
     }
 
@@ -67,7 +68,7 @@ public class Puck extends Circle {
         if(this.speed <= 1){
             return;
         }
-        this.speed -= 1;
+        this.speed -= 0.25;
     }
 
 
@@ -75,7 +76,7 @@ public class Puck extends Circle {
         this.xDirection = 0;
         this.yDirection = 0;
         this.speed = 5;
-        this.setLayoutY(GameScreenController.SCENE_HEIGHT / 2);
-        this.setLayoutX(GameScreenController.SCENE_WIDTH / 2);
+        this.setLayoutY(GameUtils.SCENE_HEIGHT / 2);
+        this.setLayoutX(GameUtils.SCENE_WIDTH / 2);
     }
 }

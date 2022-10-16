@@ -1,7 +1,7 @@
 package hr.algebra.airhockey;
 
+import hr.algebra.airhockey.hr.algebra.airhockey.utils.GameUtils;
 import hr.algebra.airhockey.models.*;
-import javafx.animation.Animation;
 import javafx.animation.AnimationTimer;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -21,11 +21,6 @@ import java.io.IOException;
 
 
 public class GameScreenController{
-    public static final int SCENE_WIDTH = 480;
-    public static final int SCENE_HEIGHT = 700;
-    private final int GAME_DURATIONS_SECONDS = 10;
-    private int secondsLeft = GAME_DURATIONS_SECONDS;
-
     @FXML
     private AnchorPane anchorPane;
     @FXML
@@ -39,32 +34,38 @@ public class GameScreenController{
     @FXML
     private Label lblGameSeconds;
 
-    private RedPlayer redPlayer;
+    private int secondsLeft = GameUtils.GAME_DURATIONS_SECONDS;
+    private Player redPlayer;
+    private Player bluePlayer;
     private Puck puck;
 
-
+    //TIMERS
     private AnimationTimer collisionTimer = new AnimationTimer() {
         @Override
         public void handle(long l) {
-            checkPuckPlayerCollision(redPlayer.getCircle(), puck);
+            checkPuckPlayerCollision(redPlayer.getCircle(), bluePlayer.getCircle(), puck);
         }
     };
 
     private AnimationTimer puckMovementTimer = new AnimationTimer() {
         @Override
         public void handle(long l) {
-            if(puck.getLayoutY() <= 0 + puck.getRadius() || puck.getLayoutY() >= SCENE_HEIGHT - puck.getRadius()){
+            if(puck.getLayoutY() <= 0 + puck.getRadius() || puck.getLayoutY() >= GameUtils.SCENE_HEIGHT - puck.getRadius()){
                 puck.setyDirection(puck.getyDirection() * -1);
                 puck.speedUp();
                 if(redGoalRectangle.getBoundsInParent().intersects(puck.getBoundsInParent())){
-                    //TODO: check time
-
+                    if(bluePlayer.getBoostPressed()){
+                        bluePlayer.scoredGoal(true);
+                    }else{
+                        bluePlayer.scoredGoal(false);
+                    }
+                    blueGoalsLabel.setText(Integer.toString(bluePlayer.getGoals()));
                     puck.reset();
                     puckMovementTimer.stop();
                     puck.setFirstTouch(false);
                 }else if(blueGoalRectangle.getBoundsInParent().intersects(puck.getBoundsInParent())){
                     //TODO: add goal
-                    if(redPlayer.isSpacePressed()){
+                    if(redPlayer.getBoostPressed()){
                         redPlayer.scoredGoal(true);
                     }else{
                         redPlayer.scoredGoal(false);
@@ -78,51 +79,68 @@ public class GameScreenController{
             }
             puck.setLayoutY(puck.getLayoutY() + (puck.getSpeed() * puck.getyDirection()));
 
-            if(puck.getLayoutX() <= 0 + puck.getRadius() || puck.getLayoutX() >= SCENE_WIDTH - puck.getRadius()){
+            if(puck.getLayoutX() <= 0 + puck.getRadius() || puck.getLayoutX() >= GameUtils.SCENE_WIDTH - puck.getRadius()){
                 //puck.slowDown();
                 puck.setxDirection(puck.getxDirection() * -1);
             }
-
             puck.setLayoutX(puck.getLayoutX() + (puck.getSpeed() * puck.getxDirection()));
         }
     };
 
+    //BEFORE GAMEPLAY METHODS
+    public void initGame(final String redPlayerName, final String bluePlayerName) {
+        redGoalsLabel.setText("0");
+        blueGoalsLabel.setText("0");
 
-    private void loadLeaderboard() {
-        collisionTimer.stop();
-        puckMovementTimer.stop();
-        FXMLLoader fxmlLoader = new FXMLLoader(MainApplication.class.getResource("leaderboard.fxml"));
-        Scene scene = null;
-        try {
-            scene = new Scene(fxmlLoader.load(), 800, 700);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        LeaderboardController leaderboardController = fxmlLoader.getController();
-        leaderboardController.setPlayers(redPlayer);        //TODO: set BLUE PLAYER
-        leaderboardController.initStats();
-        MainApplication.getStage().setTitle("AirHockey");
-        MainApplication.getStage().setScene(scene);
-        MainApplication.getStage().show();
-        LeaderboardController.currentScene = MainApplication.getStage().getScene();
+        Puck puck = new Puck(15, Color.BLACK, GameUtils.SCENE_WIDTH / 2, GameUtils.SCENE_HEIGHT / 2);
+        this.puck = puck;
+        anchorPane.getChildren().add(puck);
+        initializePlayer(redPlayerName, bluePlayerName);
+
+
+    }
+    private void initializePlayer(final String redPlayerName, final String bluePlayerName){
+        //CREATE RED PLAYER
+        Player redPlayer = new Player(redPlayerName, MainApplication.getMainScene(), PlayerType.RED, GameUtils.wasd);
+        anchorPane.getChildren().add(redPlayer.getCircle());
+        redPlayer.sceneKeyboardMovementSetup();
+        redPlayer.initPlayerTimer();
+        this.redPlayer = redPlayer;
+
+        //CREATE BLUE PLAYER
+        Player bluePlayer = new Player(bluePlayerName, MainApplication.getMainScene(), PlayerType.BLUE, GameUtils.arrows);
+        anchorPane.getChildren().add(bluePlayer.getCircle());
+        bluePlayer.sceneKeyboardMovementSetup();
+        bluePlayer.initPlayerTimer();
+        this.bluePlayer = bluePlayer;
+
+        collisionTimer.start();
+
+
 
     }
 
 
-
-    private void checkPuckPlayerCollision(Circle player, Puck puck) {
-        if(puck.getBoundsInParent().intersects(player.getBoundsInParent())){
-            puckDefineDirection();
+    //DURING GAMEPLAY METHODS
+    private void checkPuckPlayerCollision(Circle redPlayerCircle, Circle bluePlayerCircle, Puck puck) {
+        if(puck.getBoundsInParent().intersects(redPlayerCircle.getBoundsInParent())){
+            puck.slowDown();
+            puckDefineDirection(redPlayer);
             if(!puck.getFirstTouch()){
                 puckMovementTimer.start();
                 startGameTimer();
                 puck.setFirstTouch(true);
             }
-
+        }else if(puck.getBoundsInParent().intersects(bluePlayerCircle.getBoundsInParent())){
+            puck.slowDown();
+            puckDefineDirection(bluePlayer);
+            if(!puck.getFirstTouch()){
+                puckMovementTimer.start();
+                startGameTimer();
+                puck.setFirstTouch(true);
+            }
         }
     }
-
-
     private void startGameTimer() {
         Timeline gameTime = new Timeline();
         gameTime.setCycleCount(Timeline.INDEFINITE);
@@ -133,6 +151,8 @@ public class GameScreenController{
                 lblGameSeconds.setText(String.valueOf(secondsLeft));
                 if(secondsLeft <= 0){
                     gameTime.stop();
+                    collisionTimer.stop();
+                    puckMovementTimer.stop();
                     loadLeaderboard();
                 }
             }
@@ -140,47 +160,43 @@ public class GameScreenController{
         gameTime.getKeyFrames().add(perSecondKeyFrame);
         gameTime.play();
     }
-
-    private void puckDefineDirection() {
-        if(this.redPlayer.iswPressed()){
+    private void puckDefineDirection(final Player player) {
+        if(player.getBoostPressed()){
+            puck.speedUp();
+        }
+        if(player.getUpPressed()){
             this.puck.setyDirection(-1);
         }
-        if(this.redPlayer.issPressed()){
+        if(player.getDownPressed()){
             this.puck.setyDirection(1);
         }
-        if(this.redPlayer.isaPressed()){
+        if(player.getLeftPressed()){
             this.puck.setxDirection(-1);
         }
-        if(this.redPlayer.isdPressed()){
+        if(player.getRightPressed()){
             this.puck.setxDirection(1);
         }
         this.puck.updatePosition();
     }
 
-    private void initializePlayer(final String redPlayerName, final String bluePlayerName){
-        Player redPlayer = new RedPlayer(redPlayerName, MainApplication.getMainScene(), PlayerType.RED, puck);
-        anchorPane.getChildren().add(redPlayer.getCircle());
-        redPlayer.movementSetup();
-        redPlayer.init();
-        this.redPlayer = (RedPlayer) redPlayer;
-        collisionTimer.start();
-
-
-
-    }
-
-    public void initGame(final String redPlayerName, final String bluePlayerName) {
-        redGoalsLabel.setText("0");
-        blueGoalsLabel.setText("0");
-
-        Puck puck = new Puck(15, Color.BLACK, SCENE_WIDTH / 2, SCENE_HEIGHT - 300);
-        this.puck = puck;
-        anchorPane.getChildren().add(puck);
-        initializePlayer(redPlayerName, bluePlayerName);
-
+    //AFTER GAMEPLAY METHODS
+    private void loadLeaderboard() {
+        FXMLLoader fxmlLoader = new FXMLLoader(MainApplication.class.getResource("leaderboard.fxml"));
+        Scene scene = null;
+        try {
+            scene = new Scene(fxmlLoader.load(), 800, 700);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        LeaderboardController leaderboardController = fxmlLoader.getController();
+        leaderboardController.setPlayers(redPlayer, bluePlayer);        //TODO: set BLUE PLAYER
+        leaderboardController.initStats();
+        MainApplication.getStage().setTitle("AirHockey");
+        MainApplication.getStage().setScene(scene);
+        MainApplication.getStage().show();
+        GameUtils.currentScene = MainApplication.getStage().getScene();
 
     }
-
 
 
 }

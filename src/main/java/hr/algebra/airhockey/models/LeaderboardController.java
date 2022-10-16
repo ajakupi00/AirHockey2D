@@ -19,21 +19,24 @@ import java.net.URL;
 import java.util.ResourceBundle;
 
 public class LeaderboardController implements Initializable {
-    public static Scene currentScene;
     private Player redPlayer;
+    private Player bluePlayer;
+
     @FXML
     private TableView tableLeaderboard;
     @FXML
     private Button btnNewGame;
 
 
-    public void setPlayers(final Player redPlayer) {
+    public void setPlayers(final Player redPlayer, final Player bluePlayer) {
         this.redPlayer = redPlayer;
+        this.bluePlayer = bluePlayer;
         this.redPlayer.setScore(calculatePlayerStats(redPlayer));
+        this.bluePlayer.setScore(calculatePlayerStats(bluePlayer));
     }
     public void initStats(){
         final ObservableList<Player> data = FXCollections.observableArrayList(
-                redPlayer, redPlayer
+                redPlayer, bluePlayer
         );
         tableLeaderboard.setItems(data);
     }
@@ -65,7 +68,12 @@ public class LeaderboardController implements Initializable {
         TableColumn nameColumn = new TableColumn("Player name");
         nameColumn.setPrefWidth(200);
         nameColumn.setCellValueFactory(
-                new PropertyValueFactory<RedPlayer,String>("name")
+                new PropertyValueFactory<Player,String>("name")
+        );
+        TableColumn typeColumn = new TableColumn("Color");
+        typeColumn.setPrefWidth(150);
+        typeColumn.setCellValueFactory(
+                new PropertyValueFactory<Player,String>("type")
         );
         TableColumn scoreColumn = new TableColumn("Score");
         scoreColumn.setPrefWidth(200);
@@ -73,13 +81,13 @@ public class LeaderboardController implements Initializable {
                 new PropertyValueFactory<Player,Integer>("score")
         );
         TableColumn spaceColumn = new TableColumn("boostGoals");
-        spaceColumn.setPrefWidth(200);
+        spaceColumn.setPrefWidth(150);
         spaceColumn.setCellValueFactory(
                 new PropertyValueFactory<Player,Integer>("boostGoals")
         );
 
 
-        tableLeaderboard.getColumns().addAll(nameColumn, scoreColumn, spaceColumn);
+        tableLeaderboard.getColumns().addAll(nameColumn, typeColumn,scoreColumn, spaceColumn);
 
 
 

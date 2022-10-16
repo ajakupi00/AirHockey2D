@@ -1,4 +1,4 @@
-package hr.algebra.airhockey.models;
+/*package hr.algebra.airhockey.models;
 
 import hr.algebra.airhockey.MainApplication;
 import javafx.animation.AnimationTimer;
@@ -16,8 +16,8 @@ import javafx.scene.shape.Circle;
 import java.security.Key;
 
 public class RedPlayer extends Player{
-        private final int playerSpeed = 7;
-        private final int boost = 3;
+    private final int playerSpeed = 7;
+    private final int boost = 3;
         private AnimationTimer timer;
         private Circle circle;
         private Puck puck;
@@ -81,8 +81,9 @@ public class RedPlayer extends Player{
                 }
             };
         }
+
         @Override
-        public void movementSetup() {
+        public void sceneKeyboardMovementSetup() {
             EventHandler redPlayerMovementPressed = new EventHandler<KeyEvent>() {
                 @Override
                 public void handle(KeyEvent e) {
@@ -137,7 +138,7 @@ public class RedPlayer extends Player{
         }
 
         @Override
-        public void init() {
+        public void initPlayerTimer() {
 
             keyPressed.addListener((observableValue, aBoolean, t1) -> {
                 if(!aBoolean){
@@ -148,27 +149,27 @@ public class RedPlayer extends Player{
             });
         }
 
-    public boolean iswPressed() {
+    public boolean getUpPressed() {
         return wPressed.get();
     }
 
-    public boolean isaPressed() {
+    public boolean getLeftPressed() {
         return aPressed.get();
     }
 
 
-    public boolean issPressed() {
+    public boolean getDownPressed() {
         return sPressed.get();
     }
 
 
-    public boolean isdPressed() {
+    public boolean getRightPressed() {
         return dPressed.get();
     }
 
-    public boolean isSpacePressed() {
+    public boolean getBoostPressed() {
         return spacePressed.get();
     }
 
 
-}
+}*/
