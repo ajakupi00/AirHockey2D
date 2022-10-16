@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.shape.Line?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane prefHeight="400.0" prefWidth="600.0" style="-fx-background-color: linear-gradient(to top left, #ff7f50, #6a5acd);" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="hr.algebra.airhockey.MovesController">
+   <children>
+      <Label fx:id="labelPlayerName" layoutX="14.0" layoutY="14.0" text="NAME" textFill="WHITE">
+         <font>
+            <Font name="Calibri Bold" size="45.0" />
+         </font></Label>
+      <Line endX="460.0" endY="-1.1444091796875E-5" fill="WHITE" layoutX="117.0" layoutY="67.0" startX="-100.0" stroke="WHITE" strokeWidth="2.0" />
+      <Label layoutX="17.0" layoutY="75.0" text="GOALS" textFill="WHITE">
+         <font>
+            <Font name="Calibri" size="30.0" />
+         </font>
+      </Label>
+      <Line endX="460.0" endY="240.0" fill="WHITE" layoutX="118.0" layoutY="67.0" startX="460.0" stroke="WHITE" strokeWidth="2.0" />
+      <Line endX="460.0" endY="240.0" fill="WHITE" layoutX="-46.0" layoutY="67.0" startX="460.0" stroke="WHITE" strokeWidth="2.0" />
+      <Line endX="460.0" endY="-1.1444091796875E-5" fill="WHITE" layoutX="116.0" layoutY="254.0" startX="-100.0" stroke="WHITE" strokeWidth="2.0" />
+      <Label layoutX="17.0" layoutY="110.0" text="GOALS CONCIEVED" textFill="WHITE">
+         <font>
+            <Font name="Calibri" size="30.0" />
+         </font>
+      </Label>
+      <Label layoutX="15.0" layoutY="145.0" text="WIN" textFill="WHITE">
+         <font>
+            <Font name="Calibri" size="30.0" />
+         </font>
+      </Label>
+      <Label layoutX="15.0" layoutY="182.0" text="LOST" textFill="WHITE">
+         <font>
+            <Font name="Calibri" size="30.0" />
+         </font>
+      </Label>
+      <Label layoutX="15.0" layoutY="217.0" text="BOOST GOALS" textFill="WHITE">
+         <font>
+            <Font name="Calibri" size="30.0" />
+         </font>
+      </Label>
+      <Label fx:id="labelName2" layoutX="17.0" layoutY="262.0" text="TOTAL SCORE" textFill="WHITE">
+         <font>
+            <Font name="Calibri Bold" size="35.0" />
+         </font>
+      </Label>
+      <Line endX="460.0" endY="-1.1444091796875E-5" fill="WHITE" layoutX="116.0" layoutY="307.0" startX="-100.0" stroke="WHITE" strokeWidth="2.0" />
+      <Label fx:id="lblGoals" layoutX="428.0" layoutY="75.0" text="00" textFill="WHITE">
+         <font>
+            <Font name="Calibri" size="30.0" />
+         </font>
+      </Label>
+      <Label fx:id="lblGoalsConceived" layoutX="428.0" layoutY="110.0" text="00" textFill="WHITE">
+         <font>
+            <Font name="Calibri" size="30.0" />
+         </font>
+      </Label>
+      <Label fx:id="lblWins" layoutX="428.0" layoutY="145.0" text="00" textFill="WHITE">
+         <font>
+            <Font name="Calibri" size="30.0" />
+         </font>
+      </Label>
+      <Label fx:id="lblLosses" layoutX="428.0" layoutY="182.0" text="00" textFill="WHITE">
+         <font>
+            <Font name="Calibri" size="30.0" />
+         </font>
+      </Label>
+      <Label fx:id="lblBoostGoals" layoutX="428.0" layoutY="217.0" text="00" textFill="WHITE">
+         <font>
+            <Font name="Calibri" size="30.0" />
+         </font>
+      </Label>
+      <Label fx:id="lblTotalScore" layoutX="428.0" layoutY="265.0" text="00" textFill="WHITE">
+         <font>
+            <Font name="Calibri" size="30.0" />
+         </font>
+      </Label>
+      <Button fx:id="btnReturn" layoutX="460.0" layoutY="335.0" mnemonicParsing="false" onAction="#returnClick" prefHeight="26.0" prefWidth="118.0" text="Return" />
+   </children>
+</AnchorPane>
