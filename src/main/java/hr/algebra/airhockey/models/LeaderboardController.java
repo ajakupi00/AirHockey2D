@@ -1,5 +1,6 @@
 package hr.algebra.airhockey.models;
 
+import hr.algebra.airhockey.GameScreenController;
 import hr.algebra.airhockey.MainApplication;
 import hr.algebra.airhockey.MovesController;
 import javafx.collections.FXCollections;
@@ -16,6 +17,7 @@ import javafx.scene.input.MouseEvent;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.ResourceBundle;
 
 public class LeaderboardController implements Initializable {
@@ -29,6 +31,7 @@ public class LeaderboardController implements Initializable {
 
 
     public void setPlayers(final Player redPlayer, final Player bluePlayer) {
+        //TODO: load all player that ever played
         this.redPlayer = redPlayer;
         this.bluePlayer = bluePlayer;
         this.redPlayer.setScore(calculatePlayerStats(redPlayer));
@@ -42,7 +45,7 @@ public class LeaderboardController implements Initializable {
     }
 
     private int calculatePlayerStats(final Player player) {
-        int n = player.getScore() + (5 - player.getGoalsConceived()) * 5 * (1 + player.getGoals()); //TODO: replace getGoals() with spaceBarGoals!!
+        int n = player.getScore() + player.getGoals() * (2 - player.getGoalsConceived()) * 2 * (1 + player.getBoostGoals()); //TODO: replace getGoals() with spaceBarGoals!!
         return n;
     }
 
@@ -97,12 +100,18 @@ public class LeaderboardController implements Initializable {
         FXMLLoader fxmlLoader = new FXMLLoader(MainApplication.class.getResource("moves.fxml"));
         Scene scene = null;
         try {
-            scene = new Scene(fxmlLoader.load(), 600, 400);
+            scene = new Scene(fxmlLoader.load(), MovesController.SCENE_WIDTH, MovesController.SCENE_HEIGHT);
         } catch (IOException e) {
             e.printStackTrace();
         }
         MovesController movesController = fxmlLoader.getController();
-        movesController.setPlayer(player);
+        ArrayList<Move> playerMoves;
+        if(player.getType() == PlayerType.RED)
+            playerMoves = GameScreenController.redPlayerMoves;
+        else
+            playerMoves = GameScreenController.bluePlayerMoves;
+
+        movesController.setPlayer(player, playerMoves);
         MainApplication.getStage().setTitle("AirHockey");
         MainApplication.getStage().setScene(scene);
         MainApplication.getStage().show();

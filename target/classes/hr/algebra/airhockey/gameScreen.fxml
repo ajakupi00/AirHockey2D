@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.paint.Color?>
 <?import javafx.scene.paint.LinearGradient?>
@@ -9,13 +12,13 @@
 <?import javafx.scene.shape.Rectangle?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane fx:id="anchorPane" prefHeight="700.0" prefWidth="480.0" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="hr.algebra.airhockey.GameScreenController">
+<AnchorPane fx:id="anchorPane" prefHeight="715.0" prefWidth="480.0" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="hr.algebra.airhockey.GameScreenController">
    <children>
       <Circle fill="#ffffff00" layoutX="240.0" layoutY="347.0" radius="100.0" stroke="BLACK" strokeDashOffset="5.0" strokeMiterLimit="0.0" strokeType="INSIDE" strokeWidth="4.0" />
-      <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#ffffff00" height="58.0" layoutX="140.0" layoutY="642.0" stroke="RED" width="200.0" />
-      <Rectangle fx:id="redGoalRectangle" arcHeight="5.0" arcWidth="5.0" fill="#ffffff00" height="14.0" layoutX="145.0" layoutY="686.0" stroke="WHITE" strokeType="INSIDE" strokeWidth="0.0" width="190.0" />
-      <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#ffffff00" height="58.0" layoutX="140.0" stroke="#007aff" width="200.0" />
-      <Rectangle fx:id="blueGoalRectangle" arcHeight="5.0" arcWidth="5.0" fill="#ffffff00" height="14.0" layoutX="145.0" layoutY="-1.0" stroke="WHITE" strokeType="INSIDE" strokeWidth="0.0" width="190.0" />
+      <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#ffffff00" height="58.0" layoutX="140.0" layoutY="672.0" stroke="RED" width="200.0" />
+      <Rectangle fx:id="redGoalRectangle" arcHeight="5.0" arcWidth="5.0" fill="#ffffff00" height="14.0" layoutX="145.0" layoutY="701.0" stroke="WHITE" strokeType="INSIDE" strokeWidth="0.0" width="190.0" />
+      <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#ffffff00" height="58.0" layoutX="139.0" layoutY="26.0" stroke="#007aff" width="200.0" />
+      <Rectangle fx:id="blueGoalRectangle" arcHeight="5.0" arcWidth="5.0" fill="#ffffff00" height="14.0" layoutX="145.0" layoutY="20.0" stroke="WHITE" strokeType="INSIDE" strokeWidth="0.0" width="190.0" />
       <Rectangle arcHeight="5.0" arcWidth="5.0" height="4.0" layoutY="349.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" width="480.0" />
       <Label fx:id="redGoalsLabel" layoutX="442.0" layoutY="365.0">
          <textFill>
@@ -64,5 +67,15 @@
             <Font name="Calibri" size="63.0" />
          </font>
       </Label>
+      <MenuBar prefHeight="26.0" prefWidth="480.0">
+        <menus>
+          <Menu mnemonicParsing="false" text="File">
+            <items>
+              <MenuItem mnemonicParsing="false" onAction="#saveGame" text="Save" />
+                  <MenuItem mnemonicParsing="false" onAction="#loadGame" text="Load" />
+            </items>
+          </Menu>
+        </menus>
+      </MenuBar>
    </children>
 </AnchorPane>

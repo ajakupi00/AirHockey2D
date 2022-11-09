@@ -42,13 +42,16 @@ public class LoginController implements Initializable {
             throw new RuntimeException(e);
           }
           GameScreenController controller = fxmlLoader.getController();
+          GameScreenController.redPlayerMoves.clear();
+          GameScreenController.bluePlayerMoves.clear();
           Scene scene = null;
-          scene = new Scene(root, 480, 700);
+          scene = new Scene(root, 480, 715);
           MainApplication.setMainScene(scene);
           controller.initGame(redPlayerTextField.getText().trim().toString(), bluePlayerTextField.getText().trim().toString());
           MainApplication.getStage().setTitle("AirHockey");
           MainApplication.getStage().setScene(scene);
           MainApplication.getStage().show();
+
         }
     }
 

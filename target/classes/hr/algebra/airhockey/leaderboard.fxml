@@ -7,16 +7,11 @@
 
 <AnchorPane prefHeight="700.0" prefWidth="800.0" style="-fx-background-color: linear-gradient(from 0.0% 0.0% to 100.0% 24.2424%, #ffc7c7 0.0%, #ffffff 100.0%);" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="hr.algebra.airhockey.models.LeaderboardController">
    <children>
-      <Button fx:id="btnNewGame" layoutX="23.0" layoutY="594.0" mnemonicParsing="false" onMouseClicked="#startNewGame" prefHeight="58.0" prefWidth="358.0" style="-fx-background-color: #23BF78; -fx-background-radius: 10px; -fx-border-color: #000; -fx-border-radius: 10px;" text="NEW GAME" textFill="WHITE">
+      <Button fx:id="btnNewGame" layoutX="31.0" layoutY="589.0" mnemonicParsing="false" onMouseClicked="#startNewGame" prefHeight="58.0" prefWidth="358.0" style="-fx-background-color: #23BF78; -fx-background-radius: 10px; -fx-border-color: #000; -fx-border-radius: 10px;" text="NEW GAME" textFill="WHITE">
          <font>
             <Font name="Calibri Bold" size="30.0" />
          </font>
       </Button>
-      <TableView fx:id="tableLeaderboard" layoutY="-1.0" onMouseClicked="#rowMouseClick" prefHeight="506.0" prefWidth="800.0" />
-      <Button fx:id="btnMoves" layoutX="420.0" layoutY="594.0" mnemonicParsing="false" onMouseClicked="#startNewGame" prefHeight="58.0" prefWidth="358.0" style="-fx-background-color: #6E65A2; -fx-background-radius: 10px; -fx-border-color: #000; -fx-border-radius: 10px;" text="MOVES" textFill="WHITE">
-         <font>
-            <Font name="Calibri Bold" size="30.0" />
-         </font>
-      </Button>
+      <TableView fx:id="tableLeaderboard" layoutX="31.0" layoutY="27.0" onMouseClicked="#rowMouseClick" prefHeight="506.0" prefWidth="700.0" />
    </children>
 </AnchorPane>

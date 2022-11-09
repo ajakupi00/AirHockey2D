@@ -1,6 +1,7 @@
 package hr.algebra.airhockey.models;
 
 import hr.algebra.airhockey.MainApplication;
+import hr.algebra.airhockey.models.SerializableActor.SerializablePlayer;
 import javafx.animation.AnimationTimer;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
@@ -12,13 +13,19 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 
+import java.net.NoRouteToHostException;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
 import static hr.algebra.airhockey.hr.algebra.airhockey.utils.GameUtils.SCENE_HEIGHT;
 import static hr.algebra.airhockey.hr.algebra.airhockey.utils.GameUtils.SCENE_WIDTH;
 
 public class Player  {
     private final Scene scene;
-    private final PlayerType type;
-    private final String name;
+    private PlayerType type;
+    private String name;
 
     //[0] = W, [1] = A, [2] = S, [3] = D, [4] = SPACE
     private final KeyCode[] movementInputsKeys;
@@ -37,12 +44,16 @@ public class Player  {
     private Circle circle ;
     private final int playerSpeed = 7;
     private final int boost = 3;
+    private boolean lastGoalIsBoost = false;
 
     //PLAYER STATS
+    private int wins = 0;
+    private int lost = 0;
     private int goals = 0;
     private int goalsConceived = 0;
     private int score = 0;
     private int boostGoals = 0;
+
     
     
     public Player(final String name, final Scene scene, final PlayerType type, final KeyCode[] movementInputsKeys) {
@@ -216,11 +227,22 @@ public class Player  {
     public void scoredGoal(final Boolean boostGoal) {
         if(boostGoal){
             boostGoals++;
+            lastGoalIsBoost = true;
+        }else{
+            lastGoalIsBoost = false;
         }
         this.goals++;
+
     }
     public void goalConceived() {
         this.goalsConceived++;
+    }
+
+    public void playerWon(){
+        wins++;
+    }
+    public void playerLost(){
+        lost++;
     }
 
     //SETTERS
@@ -261,5 +283,19 @@ public class Player  {
     }
     public boolean getRightPressed() {return rightPressed.get();}
     public boolean getBoostPressed() {return boostPressed.get();}
+    public boolean isLastGoalIsBoost(){return lastGoalIsBoost;}
+    public int getWins(){return wins;}
+    public int getLost(){return lost;}
 
+    public void deserializePlayer(SerializablePlayer serializablePlayer){
+        this.name = serializablePlayer.getName().toString();
+        this.wins = serializablePlayer.getWins();
+        this.lost = serializablePlayer.getLost();
+        this.goals = serializablePlayer.getGoals();
+        this.goalsConceived = serializablePlayer.getGoalsConceived();
+        this.boostGoals = serializablePlayer.getBoostGoals();
+        this.circle.setLayoutX(serializablePlayer.getxPosition());
+        this.circle.setLayoutY(serializablePlayer.getyPosition());
+
+    }
 }
