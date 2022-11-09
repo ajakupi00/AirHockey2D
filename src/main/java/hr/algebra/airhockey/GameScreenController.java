@@ -11,6 +11,7 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
@@ -57,7 +58,7 @@ public class GameScreenController{
         @Override
         public void handle(long l) {
             if(puck.getLayoutY() <= 15 + puck.getRadius() || puck.getLayoutY() >= GameUtils.SCENE_HEIGHT - puck.getRadius()){
-                puck.setyDirection(puck.getyDirection() * -1);
+                puck.setyDirection((byte) (puck.getyDirection() * -1));
                 puck.speedUp();
                 if(redGoalRectangle.getBoundsInParent().intersects(puck.getBoundsInParent())){
                     if(bluePlayer.getBoostPressed()){
@@ -89,7 +90,7 @@ public class GameScreenController{
 
             if(puck.getLayoutX() <= 0 + puck.getRadius() || puck.getLayoutX() >= GameUtils.SCENE_WIDTH - puck.getRadius()){
                 //puck.slowDown();
-                puck.setxDirection(puck.getxDirection() * -1);
+                puck.setxDirection((byte) (puck.getxDirection() * -1));
             }
             puck.setLayoutX(puck.getLayoutX() + (puck.getSpeed() * puck.getxDirection()));
         }
@@ -177,16 +178,16 @@ public class GameScreenController{
             puck.speedUp();
         }
         if(player.getUpPressed()){
-            this.puck.setyDirection(-1);
+            this.puck.setyDirection((byte) -1);
         }
         if(player.getDownPressed()){
-            this.puck.setyDirection(1);
+            this.puck.setyDirection((byte) 1);
         }
         if(player.getLeftPressed()){
-            this.puck.setxDirection(-1);
+            this.puck.setxDirection((byte) -1);
         }
         if(player.getRightPressed()){
-            this.puck.setxDirection(1);
+            this.puck.setxDirection((byte) 1);
         }
         this.puck.updatePosition();
     }
@@ -244,10 +245,10 @@ public class GameScreenController{
 
     public void saveGame(ActionEvent actionEvent) throws IOException {
         SerializableActor redPlayerSerializable = new SerializablePlayer(redPlayer.getName(),
-                (byte) redPlayer.getWins(), (byte) redPlayer.getLost(), (byte) redPlayer.getGoals(), (byte) redPlayer.getGoalsConceived(), (byte) redPlayer.getBoostGoals(),
+                redPlayer.getWins(), redPlayer.getLost(), redPlayer.getGoals(), redPlayer.getGoalsConceived(),redPlayer.getBoostGoals(),
                 (byte) 0, (byte) 0, redPlayer.getCircle().getLayoutX(), redPlayer.getCircle().getLayoutY());
         SerializableActor bluePlayerSerializable = new SerializablePlayer( bluePlayer.getName(),
-                (byte)  bluePlayer.getWins(), (byte)  bluePlayer.getLost(), (byte)  bluePlayer.getGoals(), (byte)  bluePlayer.getGoalsConceived(), (byte)  bluePlayer.getBoostGoals(),
+                  bluePlayer.getWins(), bluePlayer.getLost(), bluePlayer.getGoals(),  bluePlayer.getGoalsConceived(), bluePlayer.getBoostGoals(),
                 (byte) 0, (byte) 0,  bluePlayer.getCircle().getLayoutX(),  bluePlayer.getCircle().getLayoutY());
         SerializableActor puckSerializable = new SerializableActor.SerializablePuck((byte) puck.getxDirection(), (byte) puck.getyDirection(),
                 puck.getLayoutX(), puck.getLayoutY());
@@ -256,12 +257,16 @@ public class GameScreenController{
                 (SerializablePlayer) redPlayerSerializable,
                 (SerializablePlayer) bluePlayerSerializable,
                 (SerializableActor.SerializablePuck) puckSerializable,
-                Byte.parseByte(redGoalsLabel.getText().toString()), Byte.parseByte(blueGoalsLabel.getText().toString()));
+                Byte.parseByte(redGoalsLabel.getText()), Byte.parseByte(blueGoalsLabel.getText()));
 
         try (ObjectOutputStream serializer = new ObjectOutputStream(
                 new FileOutputStream("savedGame.ser"))) {
             serializer.writeObject(saveGame);
-            System.out.println("Game saved successfully!");
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Gamed save successfully!");
+            alert.setContentText("Your game has been saved successfully!");
+
+            alert.showAndWait();
         }
     }
 
@@ -275,6 +280,10 @@ public class GameScreenController{
                 blueGoalsLabel.setText(Byte.toString(game.getBluePlayerScore()));
                 redGoalsLabel.setText(Byte.toString(game.getRedPlayerScore()));
         }
+    }
+
+    public void generateDocumentation(ActionEvent actionEvent) {
+        GameUtils.generateDocumentation();
     }
 }
 

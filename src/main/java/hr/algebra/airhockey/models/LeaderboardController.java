@@ -45,7 +45,7 @@ public class LeaderboardController implements Initializable {
     }
 
     private int calculatePlayerStats(final Player player) {
-        int n = player.getScore() + player.getGoals() * (2 - player.getGoalsConceived()) * 2 * (1 + player.getBoostGoals()); //TODO: replace getGoals() with spaceBarGoals!!
+        int n = player.getScore() + (Math.abs(player.getGoals() - player.getGoalsConceived()) + player.getBoostGoals() * 2);
         return n;
     }
 

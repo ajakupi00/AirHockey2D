@@ -47,12 +47,12 @@ public class Player  {
     private boolean lastGoalIsBoost = false;
 
     //PLAYER STATS
-    private int wins = 0;
-    private int lost = 0;
-    private int goals = 0;
-    private int goalsConceived = 0;
+    private byte wins = 0;
+    private byte lost = 0;
+    private byte goals = 0;
+    private byte goalsConceived = 0;
     private int score = 0;
-    private int boostGoals = 0;
+    private byte boostGoals = 0;
 
     
     
@@ -260,13 +260,13 @@ public class Player  {
     public int getScore() {
         return score;
     }
-    public int getBoostGoals() {
+    public byte getBoostGoals() {
         return boostGoals;
     }
-    public int getGoals() {
+    public byte getGoals() {
         return goals;
     }
-    public int getGoalsConceived() {
+    public byte getGoalsConceived() {
         return goalsConceived;
     }
     public String getName() {
@@ -284,8 +284,8 @@ public class Player  {
     public boolean getRightPressed() {return rightPressed.get();}
     public boolean getBoostPressed() {return boostPressed.get();}
     public boolean isLastGoalIsBoost(){return lastGoalIsBoost;}
-    public int getWins(){return wins;}
-    public int getLost(){return lost;}
+    public byte getWins(){return wins;}
+    public byte getLost(){return lost;}
 
     public void deserializePlayer(SerializablePlayer serializablePlayer){
         this.name = serializablePlayer.getName().toString();

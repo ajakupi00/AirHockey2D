@@ -7,8 +7,8 @@ import javafx.scene.paint.Paint;
 import javafx.scene.shape.Circle;
 
 public class Puck extends Circle {
-    private int xDirection = 0;
-    private int yDirection = 0;
+    private byte xDirection = 0;
+    private byte yDirection = 0;
     private double speed = 5;
     private Boolean firstTouch = false;
 
@@ -49,11 +49,11 @@ public class Puck extends Circle {
         }
     }
 
-    public void setxDirection(int xDirection) {
+    public void setxDirection(byte xDirection) {
         this.xDirection = xDirection;
     }
 
-    public void setyDirection(int yDirection) {
+    public void setyDirection(byte yDirection) {
         this.yDirection = yDirection;
     }
 
