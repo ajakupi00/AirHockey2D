@@ -1,8 +1,11 @@
 package hr.algebra.airhockey;
 
+import hr.algebra.airhockey.Threads.ClientChatThread;
+import hr.algebra.airhockey.Threads.ClientThread;
 import hr.algebra.airhockey.hr.algebra.airhockey.utils.GameUtils;
 import hr.algebra.airhockey.models.*;
 import hr.algebra.airhockey.models.SerializableActor.SerializablePlayer;
+import hr.algebra.airhockey.rmiserver.ChatService;
 import javafx.animation.AnimationTimer;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -13,6 +16,8 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
@@ -20,8 +25,13 @@ import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
 
 import java.io.*;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 
 public class GameScreenController{
@@ -37,6 +47,10 @@ public class GameScreenController{
     private Label blueGoalsLabel;
     @FXML
     private Label lblGameSeconds;
+    @FXML
+    private TextArea chatHistoryTextArea;
+    @FXML
+    private TextField chatMessageTextField;
 
     private int secondsLeft = GameUtils.GAME_DURATIONS_SECONDS;
     public static ArrayList<Move> redPlayerMoves = new ArrayList<Move>();
@@ -45,6 +59,8 @@ public class GameScreenController{
     private Player bluePlayer;
     private Puck puck;
     private boolean winnerDefined = false;
+    private ChatService stub = null;
+
 
     //TIMERS
     private AnimationTimer collisionTimer = new AnimationTimer() {
@@ -98,6 +114,7 @@ public class GameScreenController{
 
 
 
+
     //BEFORE GAMEPLAY METHODS
     public void initGame(final String redPlayerName, final String bluePlayerName) {
         redGoalsLabel.setText("0");
@@ -107,9 +124,19 @@ public class GameScreenController{
         this.puck = puck;
         anchorPane.getChildren().add(puck);
         initializePlayer(redPlayerName, bluePlayerName);
-
-
+        Registry registry = null;
+        try {
+            registry = LocateRegistry.getRegistry("localhost", 1099);
+            stub = (ChatService) registry.lookup(ChatService.REMOTE_OBJECT_NAME);
+            ExecutorService executor = Executors.newFixedThreadPool(1);
+            executor.execute(new ClientChatThread(stub, chatHistoryTextArea));
+        } catch (RemoteException | NotBoundException e) {
+            e.printStackTrace();
+        }
     }
+
+
+
     private void initializePlayer(final String redPlayerName, final String bluePlayerName){
         //CREATE RED PLAYER
         Player redPlayer = new Player(redPlayerName, MainApplication.getMainScene(), PlayerType.RED, GameUtils.wasd);
@@ -171,8 +198,6 @@ public class GameScreenController{
         gameTime.getKeyFrames().add(perSecondKeyFrame);
         gameTime.play();
     }
-
-
     private void puckDefineDirection(final Player player) {
         if(player.getBoostPressed()){
             puck.speedUp();
@@ -202,6 +227,18 @@ public class GameScreenController{
             bluePlayerMoves.add(new Move(gameSecond, goalType));
             redPlayerMoves.add(new Move(gameSecond, GoalType.CONCEIVED));
         }
+    }
+    public void sendMessage(){
+        try {
+            stub.sendMessage(chatMessageTextField.getText(), redPlayer.getName());
+            StringBuilder chatHistoryBuilder = new StringBuilder();
+            stub.getChatHistory().forEach(a -> chatHistoryBuilder.append(a + "\n"));
+            chatHistoryTextArea.setText(chatHistoryBuilder.toString());
+            chatMessageTextField.clear();
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
+
     }
     //AFTER GAMEPLAY METHODS
 
@@ -285,6 +322,8 @@ public class GameScreenController{
     public void generateDocumentation(ActionEvent actionEvent) {
         GameUtils.generateDocumentation();
     }
+    
+
 }
 
 

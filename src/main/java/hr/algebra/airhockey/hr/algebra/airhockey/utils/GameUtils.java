@@ -1,5 +1,7 @@
 package hr.algebra.airhockey.hr.algebra.airhockey.utils;
 
+import hr.algebra.airhockey.jndi.helper.JndiHelper;
+import hr.algebra.airhockey.jndi.helper.ServerConfigurationKey;
 import hr.algebra.airhockey.models.Player;
 import hr.algebra.airhockey.models.SerializableActor;
 import hr.algebra.airhockey.models.SerializableActor.SerializablePlayer;
@@ -7,6 +9,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.input.KeyCode;
 
+import javax.naming.NamingException;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -26,13 +29,19 @@ public class GameUtils {
 
     public static final int SCENE_WIDTH = 480;
     public static final int SCENE_HEIGHT = 715;
-    public static final int GAME_DURATIONS_SECONDS = 30;
+    public static final int GAME_DURATIONS_SECONDS = 60;
 
     public static final KeyCode[] wasd = {KeyCode.W, KeyCode.A, KeyCode.S, KeyCode.D, KeyCode.SPACE};
     public static final KeyCode[] arrows = {KeyCode.UP, KeyCode.LEFT, KeyCode.DOWN, KeyCode.RIGHT, KeyCode.L};
 
+    public static String SERVER_HOST;
+    public static int SERVER_PORT;
 
-    private GameUtils(){
+    private GameUtils() throws NamingException, IOException {
+        SERVER_HOST = JndiHelper.getConfigurationParameter(
+                ServerConfigurationKey.GAME_SERVER_IP);
+        SERVER_PORT = Integer.parseInt(JndiHelper.getConfigurationParameter(
+                ServerConfigurationKey.GAME_SERVER_PORT));
     }
 
     public static void generateDocumentation() {

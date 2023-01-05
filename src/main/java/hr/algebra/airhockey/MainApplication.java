@@ -2,6 +2,7 @@ package hr.algebra.airhockey;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
@@ -29,7 +30,23 @@ public class MainApplication extends Application {
         mainScene = scene;
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
+        if(args.length < 1){
+            System.out.println("PlayerID is required!");
+            System.exit(1);
+        }
+
+        String playerID = args[0];
+
+        FXMLLoader fxmlLoader = new FXMLLoader(MainApplication.class.getResource("login.fxml"));
+        Parent root = (Parent) fxmlLoader.load();
+        LoginController loginController = (LoginController) fxmlLoader.getController();
+        loginController.setPlayerId(playerID);
+
+        System.out.println("Process ID: " + ProcessHandle.current().pid());
+
         launch();
     }
+
+
 }

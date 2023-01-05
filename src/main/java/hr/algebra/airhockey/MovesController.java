@@ -47,11 +47,16 @@ public class MovesController implements Initializable {
     private Player player;
     private ObservableList<Move> playerMoves;
 
+
     public void setPlayer(final Player player, final ArrayList<Move> lastGamePlayerMoves){
         this.player = player;
         this.playerMoves =  FXCollections.observableArrayList(lastGamePlayerMoves);
         tblGoals.setItems(playerMoves);
         manageLabels();
+        /*
+        * BROJ      PLAYER1     PLAYER2
+        *  5          YES         NO
+        * */
 
 
     }
