@@ -12,6 +12,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -60,21 +61,7 @@ public class LoginController implements Initializable {
                 oos.writeObject(new LoginMessage(playerTextField.getText(), playerTextField.getText()));
                 System.out.println("Client sent message back to the server!");
 
-
-                System.out.println("Waiting for data...");
-
-                while (true) {
-                    System.out.println("Data available!");
-                    String returnMessage = (String)  ois.readObject();
-                    System.out.println("We got " + returnMessage);
-                    if(returnMessage == "CONTINUE_GAME"){
-                        break;
-                    }
-                }
-
             } catch (IOException e) {
-                e.printStackTrace();
-            } catch (ClassNotFoundException e) {
                 e.printStackTrace();
             }
 

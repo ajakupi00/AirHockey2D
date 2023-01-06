@@ -1,7 +1,6 @@
 package hr.algebra.airhockey;
 
 import hr.algebra.airhockey.Threads.ClientChatThread;
-import hr.algebra.airhockey.Threads.ClientThread;
 import hr.algebra.airhockey.hr.algebra.airhockey.utils.GameUtils;
 import hr.algebra.airhockey.models.*;
 import hr.algebra.airhockey.models.SerializableActor.SerializablePlayer;
@@ -25,6 +24,7 @@ import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
 
 import java.io.*;
+import java.net.*;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -127,17 +127,65 @@ public class GameScreenController{
         Registry registry = null;
         try {
             registry = LocateRegistry.getRegistry("localhost", 1099);
+            new Thread(() -> listenToUDPRequests()).start();
+            new Thread(() ->  refreshMsg());
             stub = (ChatService) registry.lookup(ChatService.REMOTE_OBJECT_NAME);
             ExecutorService executor = Executors.newFixedThreadPool(1);
             executor.execute(new ClientChatThread(stub, chatHistoryTextArea));
+
+
         } catch (RemoteException | NotBoundException e) {
             e.printStackTrace();
         }
     }
 
+    private void listenToUDPRequests() {
+        try (DatagramSocket socket = new DatagramSocket(0)) {
+            System.err.println("Client socket started...");
+            socket.setSoTimeout(10000);
+            InetAddress host = InetAddress.getLocalHost();
+            while (true) {
+                try {
+                    Thread.sleep(1000);
+                    String hello = "hello from " + redPlayer.getName();
+                    DatagramPacket request = new DatagramPacket(hello.getBytes(), hello.length(), host, 5001);
+                    byte[] data = new byte[1024];
+                    DatagramPacket response = new DatagramPacket(data, data.length);
+                    socket.send(request);
+                    socket.receive(response);
+                    String string = new String(response.getData(), 0, response.getLength());
+                    System.out.println(string);
+                } catch (IOException | InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+
+        }
+    }
+
+    private void refreshMsg(){
+        while (true){
+            try{
+                Thread.sleep(1500);
+                chatHistoryTextArea.clear();
+                StringBuilder chatHistoryBuilder = new StringBuilder();
+                stub.getChatHistory().forEach(a -> chatHistoryBuilder.append(a + "\n"));
+                chatHistoryTextArea.setText(chatHistoryBuilder.toString());
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            } catch (InterruptedException e) {
+                e.printStackTrace();        }
+        }
+        }
 
 
-    private void initializePlayer(final String redPlayerName, final String bluePlayerName){
+
+
+        private void initializePlayer(final String redPlayerName, final String bluePlayerName){
         //CREATE RED PLAYER
         Player redPlayer = new Player(redPlayerName, MainApplication.getMainScene(), PlayerType.RED, GameUtils.wasd);
         anchorPane.getChildren().add(redPlayer.getCircle());
