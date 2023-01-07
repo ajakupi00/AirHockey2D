@@ -18,10 +18,12 @@ package hr.algebra.airhockey.models;
 
 import hr.algebra.airhockey.models.SerializableActor.SerializablePlayer;
 import hr.algebra.airhockey.models.SerializableActor.SerializablePuck;
+import org.apache.commons.lang3.SerializationUtils;
 
-import java.io.Serializable;
+import java.io.*;
 
 public class Game implements Serializable {
+    private static final long serialVersionUID = 14L;
 
     private byte redPlayerScore;
     private byte bluePlayerScore;
@@ -37,6 +39,34 @@ public class Game implements Serializable {
         this.puck = puck;
         this.redPlayerScore = redPlayerScore;
         this.bluePlayerScore = bluePlayerScore;
+    }
+
+    public Game() {
+        this.secondsLeft = 0;
+        this.redPlayer = new SerializablePlayer("",((byte)0),((byte)0),((byte)0),((byte)0),((byte)0),((byte)0),((byte)0),0,0);
+        this.bluePlayer = new SerializablePlayer("",((byte)0),((byte)0),((byte)0),((byte)0),((byte)0),((byte)0),((byte)0),0,0);
+        this.puck = new SerializablePuck(((byte)0),((byte)0), 0,0);
+        this.redPlayerScore = ((byte)0);
+        this.bluePlayerScore = ((byte)0);
+    }
+
+    public static Game bytesToGame(byte[] bytes) {
+        if (bytes == null) {
+            return null;
+        }
+        Game game = null;
+        try {
+            ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
+            BufferedInputStream bis = new BufferedInputStream(bais);
+
+             game = SerializationUtils.deserialize(bis);
+            bis.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }finally {
+            return game;
+        }
+
     }
 
     public short getSecondsLeft() {

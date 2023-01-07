@@ -3,6 +3,7 @@ module hr.algebra.airhockey {
     requires javafx.fxml;
     requires java.rmi;
     requires java.naming;
+    requires org.apache.commons.lang3;
 
 
     opens hr.algebra.airhockey to javafx.fxml;

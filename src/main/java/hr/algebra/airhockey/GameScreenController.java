@@ -22,6 +22,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
+import org.apache.commons.lang3.SerializationUtils;
 
 import java.io.*;
 import java.net.*;
@@ -146,15 +147,22 @@ public class GameScreenController{
             InetAddress host = InetAddress.getLocalHost();
             while (true) {
                 try {
-                    Thread.sleep(1000);
-                    String hello = "hello from " + redPlayer.getName();
-                    DatagramPacket request = new DatagramPacket(hello.getBytes(), hello.length(), host, 5001);
-                    byte[] data = new byte[1024];
+                    Thread.sleep(2000);
+                    System.err.println("Client sending game object...");
+                    Game saveGame = getGame();
+                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                    SerializationUtils.serialize(saveGame, baos);
+                    baos.flush();
+                    byte[] data = baos.toByteArray();
+
+                    DatagramPacket request = new DatagramPacket(data, data.length, host, 5001);
                     DatagramPacket response = new DatagramPacket(data, data.length);
                     socket.send(request);
                     socket.receive(response);
-                    String string = new String(response.getData(), 0, response.getLength());
-                    System.out.println(string);
+                    Game game = Game.bytesToGame(response.getData());
+                    System.err.println("Received a game object from server. :)");
+
+
                 } catch (IOException | InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -329,6 +337,20 @@ public class GameScreenController{
 
 
     public void saveGame(ActionEvent actionEvent) throws IOException {
+        Game saveGame = getGame();
+
+        try (ObjectOutputStream serializer = new ObjectOutputStream(
+                new FileOutputStream("savedGame.ser"))) {
+            serializer.writeObject(saveGame);
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Gamed save successfully!");
+            alert.setContentText("Your game has been saved successfully!");
+
+            alert.showAndWait();
+        }
+    }
+
+    private Game getGame() {
         SerializableActor redPlayerSerializable = new SerializablePlayer(redPlayer.getName(),
                 redPlayer.getWins(), redPlayer.getLost(), redPlayer.getGoals(), redPlayer.getGoalsConceived(),redPlayer.getBoostGoals(),
                 (byte) 0, (byte) 0, redPlayer.getCircle().getLayoutX(), redPlayer.getCircle().getLayoutY());
@@ -343,16 +365,7 @@ public class GameScreenController{
                 (SerializablePlayer) bluePlayerSerializable,
                 (SerializableActor.SerializablePuck) puckSerializable,
                 Byte.parseByte(redGoalsLabel.getText()), Byte.parseByte(blueGoalsLabel.getText()));
-
-        try (ObjectOutputStream serializer = new ObjectOutputStream(
-                new FileOutputStream("savedGame.ser"))) {
-            serializer.writeObject(saveGame);
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle("Gamed save successfully!");
-            alert.setContentText("Your game has been saved successfully!");
-
-            alert.showAndWait();
-        }
+        return saveGame;
     }
 
     public void loadGame(ActionEvent actionEvent) throws IOException, ClassNotFoundException {
