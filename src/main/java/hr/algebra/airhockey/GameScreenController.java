@@ -2,12 +2,15 @@ package hr.algebra.airhockey;
 
 import hr.algebra.airhockey.Threads.ClientChatThread;
 import hr.algebra.airhockey.hr.algebra.airhockey.utils.GameUtils;
+import hr.algebra.airhockey.hr.algebra.airhockey.utils.XMLUtility;
 import hr.algebra.airhockey.models.*;
 import hr.algebra.airhockey.models.SerializableActor.SerializablePlayer;
+import hr.algebra.airhockey.models.SerializableActor.SerializablePuck;
 import hr.algebra.airhockey.rmiserver.ChatService;
 import javafx.animation.AnimationTimer;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -23,14 +26,28 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
 import org.apache.commons.lang3.SerializationUtils;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.*;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 import java.io.*;
-import java.net.*;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -62,6 +79,8 @@ public class GameScreenController{
     private boolean winnerDefined = false;
     private ChatService stub = null;
 
+    private Document xmlDocument;
+    private List<Game> gameMoves = new ArrayList<>();
 
     //TIMERS
     private AnimationTimer collisionTimer = new AnimationTimer() {
@@ -125,11 +144,13 @@ public class GameScreenController{
         this.puck = puck;
         anchorPane.getChildren().add(puck);
         initializePlayer(redPlayerName, bluePlayerName);
+        initializeXMLDocument();
         Registry registry = null;
         try {
             registry = LocateRegistry.getRegistry("localhost", 1099);
-            new Thread(() -> listenToUDPRequests()).start();
-            new Thread(() ->  refreshMsg());
+            //new Thread(() -> listenToUDPRequests()).start();
+            new Thread(() -> writeXML()).start();
+            //new Thread(() ->  refreshMsg());
             stub = (ChatService) registry.lookup(ChatService.REMOTE_OBJECT_NAME);
             ExecutorService executor = Executors.newFixedThreadPool(1);
             executor.execute(new ClientChatThread(stub, chatHistoryTextArea));
@@ -140,6 +161,28 @@ public class GameScreenController{
         }
     }
 
+    private void initializeXMLDocument() {
+        try {
+            DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
+            this.xmlDocument = documentBuilder.newDocument();
+
+        } catch (ParserConfigurationException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    private void writeXML() {
+       while (!winnerDefined){
+           try {
+               gameMoves.add(getGame());
+               Thread.sleep(100);
+           } catch (InterruptedException e) {
+               e.printStackTrace();
+           }
+       }
+    }
     private void listenToUDPRequests() {
         try (DatagramSocket socket = new DatagramSocket(0)) {
             System.err.println("Client socket started...");
@@ -317,6 +360,7 @@ public class GameScreenController{
 
     }
     private void loadLeaderboard() {
+        saveXML();
         FXMLLoader fxmlLoader = new FXMLLoader(MainApplication.class.getResource("leaderboard.fxml"));
         Scene scene = null;
         try {
@@ -335,6 +379,136 @@ public class GameScreenController{
 
     }
 
+    private void saveXML() {
+        try {
+            XMLUtility.createGameMovesElement(gameMoves, xmlDocument);
+
+            Transformer transformer = TransformerFactory.newInstance().newTransformer();
+
+            Source xmlSource = new DOMSource(this.xmlDocument);
+            Result xmlResult = new StreamResult(new File("gameplay.xml"));
+
+            transformer.transform(xmlSource, xmlResult);
+            System.err.println("XML CREATED :) ---------");
+        } catch (TransformerException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+
+    public void replayGame(ActionEvent actionEvent){
+        try{
+            puckMovementTimer.stop();
+            collisionTimer.stop();
+
+            File gameplayFile = new File("gameplay.xml");
+            InputStream gameplayStream = new FileInputStream(gameplayFile);
+
+            DocumentBuilder parser = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+            Document xmlGameplayDocument = parser.parse(gameplayStream);
+
+            String rootNodeName = xmlGameplayDocument.getDocumentElement().getNodeName();
+            NodeList nodeList = xmlGameplayDocument.getElementsByTagName("GameMove");
+
+            List<Game> gameList = new ArrayList<>();
+
+            for (int i = 0; i < nodeList.getLength(); i++) {
+                SerializablePuck puck;
+                SerializablePlayer redPlayer;
+                SerializablePlayer bluePlayer;
+                Node gameMoveNode = nodeList.item(i);
+
+                if(gameMoveNode.getNodeType() == Node.ELEMENT_NODE){
+                    Element gameMoveElement = (Element) gameMoveNode;
+                    puck = nodeToPuck(gameMoveElement.getElementsByTagName("Puck").item(0));
+                    redPlayer = nodeToPlayer(gameMoveElement.getElementsByTagName("RedPlayer").item(0));
+                    bluePlayer = nodeToPlayer(gameMoveElement.getElementsByTagName("BluePlayer").item(0));
+
+                    Byte redPlayerScore = Byte.parseByte(gameMoveElement
+                            .getElementsByTagName("RedPlayerScore")
+                            .item(0)
+                            .getTextContent());
+                    Byte bluePlayerScore = Byte.parseByte(gameMoveElement
+                            .getElementsByTagName("BluePlayerScore")
+                            .item(0)
+                            .getTextContent());
+
+                    Short seconds = Short.parseShort(gameMoveElement
+                            .getElementsByTagName("Seconds")
+                            .item(0)
+                            .getTextContent());
+
+                    gameList.add(new Game(seconds, redPlayer, bluePlayer, puck, redPlayerScore, bluePlayerScore));
+                }
+            }
+
+           new Thread(() -> {
+               try {
+                   setGameMoves(gameList);
+               } catch (InterruptedException e) {
+                   e.printStackTrace();
+               }
+           }).start();
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (ParserConfigurationException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (SAXException e) {
+            e.printStackTrace();
+        }
+
+
+    }
+
+    private synchronized void setGameMoves(List<Game> gameList) throws InterruptedException {
+        for (Game game : gameList) {
+            Platform.runLater(new Runnable() {
+                @Override
+                public void run() {
+                    lblGameSeconds.setText(Short.toString(game.getSecondsLeft()));
+                    redGoalsLabel.setText(Byte.toString(game.getRedPlayerScore()));
+                    blueGoalsLabel.setText(Byte.toString(game.getBluePlayerScore()));
+                }
+            });
+
+            puck.setLayoutX(game.getPuck().getxPosition());
+            puck.setLayoutY(game.getPuck().getyPosition());
+            redPlayer.getCircle().setLayoutX(game.getRedPlayer().getxPosition());
+            redPlayer.getCircle().setLayoutY(game.getRedPlayer().getyPosition());
+            bluePlayer.getCircle().setLayoutX(game.getBluePlayer().getxPosition());
+            bluePlayer.getCircle().setLayoutY(game.getBluePlayer().getyPosition());
+            Thread.sleep(100);
+        }
+
+    }
+
+    private SerializablePuck nodeToPuck(Node actor) {
+        if(actor.getNodeType() == Node.ELEMENT_NODE){
+            Element actorElement = (Element) actor;
+            double xPosition = Double.parseDouble(actorElement.getElementsByTagName("PositionX").item(0).getTextContent());
+            double yPosition = Double.parseDouble(actorElement.getElementsByTagName("PositionY").item(0).getTextContent());
+            byte xDirection = Byte.parseByte(actorElement.getElementsByTagName("DirectionX").item(0).getTextContent());
+            byte yDirection = Byte.parseByte(actorElement.getElementsByTagName("DirectionY").item(0).getTextContent());
+            return new SerializablePuck(xDirection, yDirection, xPosition, yPosition);
+        }
+        return null;
+    }
+    private SerializablePlayer nodeToPlayer(Node actor) {
+
+        if(actor.getNodeType() == Node.ELEMENT_NODE){
+            Element actorElement = (Element) actor;
+            double xPosition = Double.parseDouble(actorElement.getElementsByTagName("PositionX").item(0).getTextContent());
+            double yPosition = Double.parseDouble(actorElement.getElementsByTagName("PositionY").item(0).getTextContent());
+            byte xDirection = Byte.parseByte(actorElement.getElementsByTagName("DirectionX").item(0).getTextContent());
+            byte yDirection = Byte.parseByte(actorElement.getElementsByTagName("DirectionY").item(0).getTextContent());
+            return new SerializablePlayer(actor.getNodeName(), (byte) 0,(byte)0,(byte)0,(byte)0,(byte)0, xDirection, yDirection, xPosition, yPosition);
+        }
+        return null;
+    }
 
     public void saveGame(ActionEvent actionEvent) throws IOException {
         Game saveGame = getGame();
@@ -348,6 +522,9 @@ public class GameScreenController{
 
             alert.showAndWait();
         }
+
+        saveXML();
+        winnerDefined = true;
     }
 
     private Game getGame() {
@@ -357,13 +534,13 @@ public class GameScreenController{
         SerializableActor bluePlayerSerializable = new SerializablePlayer( bluePlayer.getName(),
                   bluePlayer.getWins(), bluePlayer.getLost(), bluePlayer.getGoals(),  bluePlayer.getGoalsConceived(), bluePlayer.getBoostGoals(),
                 (byte) 0, (byte) 0,  bluePlayer.getCircle().getLayoutX(),  bluePlayer.getCircle().getLayoutY());
-        SerializableActor puckSerializable = new SerializableActor.SerializablePuck((byte) puck.getxDirection(), (byte) puck.getyDirection(),
+        SerializableActor puckSerializable = new SerializablePuck((byte) puck.getxDirection(), (byte) puck.getyDirection(),
                 puck.getLayoutX(), puck.getLayoutY());
         Game saveGame = new Game(
                 (short) secondsLeft,
                 (SerializablePlayer) redPlayerSerializable,
                 (SerializablePlayer) bluePlayerSerializable,
-                (SerializableActor.SerializablePuck) puckSerializable,
+                (SerializablePuck) puckSerializable,
                 Byte.parseByte(redGoalsLabel.getText()), Byte.parseByte(blueGoalsLabel.getText()));
         return saveGame;
     }

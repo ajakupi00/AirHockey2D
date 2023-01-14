@@ -29,7 +29,7 @@ public class GameUtils {
 
     public static final int SCENE_WIDTH = 480;
     public static final int SCENE_HEIGHT = 715;
-    public static final int GAME_DURATIONS_SECONDS = 60;
+    public static final int GAME_DURATIONS_SECONDS = 10;
 
     public static final KeyCode[] wasd = {KeyCode.W, KeyCode.A, KeyCode.S, KeyCode.D, KeyCode.SPACE};
     public static final KeyCode[] arrows = {KeyCode.UP, KeyCode.LEFT, KeyCode.DOWN, KeyCode.RIGHT, KeyCode.L};

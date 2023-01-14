@@ -7,7 +7,6 @@ import java.util.List;
 
 public class ChatServiceImpl  implements ChatService {
     private List<String> chatHistory;
-    private String lastMessage;
 
     public ChatServiceImpl(){
         chatHistory = new ArrayList<>();

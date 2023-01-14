@@ -83,10 +83,15 @@
                   <MenuItem mnemonicParsing="false" onAction="#generateDocumentation" text="Generate" />
                </items>
             </Menu>
+            <Menu mnemonicParsing="false" text="Gameplay">
+               <items>
+                  <MenuItem mnemonicParsing="false" onAction="#replayGame" text="Replay last game" />
+               </items>
+            </Menu>
         </menus>
       </MenuBar>
       <Rectangle arcHeight="5.0" arcWidth="5.0" height="705.0" layoutX="480.0" layoutY="26.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" width="4.0" />
-      <TextArea fx:id="chatHistoryTextArea" layoutX="492.0" layoutY="35.0" prefHeight="522.0" prefWidth="247.0" style="-fx-border-color: black;" />
+      <TextArea fx:id="chatHistoryTextArea" disable="true" layoutX="492.0" layoutY="35.0" prefHeight="522.0" prefWidth="247.0" style="-fx-border-color: black;" />
       <TextField fx:id="chatMessageTextField" layoutX="494.0" layoutY="565.0" prefHeight="26.0" prefWidth="247.0" />
       <Button layoutX="601.0" layoutY="600.0" mnemonicParsing="false" onAction="#sendMessage" prefHeight="26.0" prefWidth="140.0" text="Send" />
    </children>
